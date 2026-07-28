@@ -1,0 +1,224 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#0b3d2e" />
+  <title>Fairway — Golf Club Distances</title>
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="icon" href="icon.svg" type="image/svg+xml" />
+  <link rel="apple-touch-icon" href="icon.svg" />
+  <style>
+    :root {
+      --bg: #0b1f17;
+      --panel: #12291f;
+      --panel-2: #17362a;
+      --line: #23463a;
+      --text: #eaf3ee;
+      --muted: #9fc0b1;
+      --accent: #35d07f;
+      --accent-2: #2bb673;
+      --pro: #f2c14e;
+      --danger: #ff6b6b;
+      --radius: 16px;
+    }
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    html, body { margin: 0; padding: 0; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, system-ui, sans-serif;
+      padding-bottom: 84px;
+      min-height: 100vh;
+    }
+    header {
+      padding: max(18px, env(safe-area-inset-top)) 18px 14px;
+      background: linear-gradient(160deg, #0d4030, #0b1f17);
+      border-bottom: 1px solid var(--line);
+      position: sticky; top: 0; z-index: 10;
+    }
+    header h1 { margin: 0; font-size: 22px; letter-spacing: .3px; display: flex; align-items: center; gap: 8px; }
+    header p { margin: 4px 0 0; color: var(--muted); font-size: 13px; }
+    main { padding: 16px 14px; max-width: 640px; margin: 0 auto; }
+    .hidden { display: none !important; }
+
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 14px;
+      margin-bottom: 14px;
+    }
+    label { display: block; font-size: 13px; color: var(--muted); margin-bottom: 6px; }
+    select, input[type="number"], input[type="date"] {
+      width: 100%; padding: 13px; font-size: 16px;
+      background: var(--panel-2); color: var(--text);
+      border: 1px solid var(--line); border-radius: 12px; outline: none;
+    }
+    select:focus, input:focus { border-color: var(--accent); }
+    .row { display: flex; gap: 10px; }
+    .row > div { flex: 1; }
+    button {
+      font-size: 16px; font-weight: 600; border: none; border-radius: 12px;
+      padding: 14px; cursor: pointer; width: 100%;
+    }
+    .btn-primary { background: var(--accent); color: #04120b; margin-top: 12px; }
+    .btn-primary:active { background: var(--accent-2); }
+    .btn-ghost { background: transparent; color: var(--muted); border: 1px solid var(--line); }
+
+    .pro-hint {
+      margin-top: 12px; padding: 10px 12px; border-radius: 12px;
+      background: rgba(242,193,78,.1); border: 1px solid rgba(242,193,78,.3);
+      font-size: 13px; color: var(--pro); display: flex; justify-content: space-between; align-items: center;
+    }
+    .pro-hint b { font-size: 16px; }
+
+    /* club summary cards */
+    .club-card { display: flex; align-items: center; gap: 12px; }
+    .club-badge {
+      width: 46px; height: 46px; flex: none; border-radius: 12px;
+      background: var(--panel-2); border: 1px solid var(--line);
+      display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 15px;
+    }
+    .club-main { flex: 1; min-width: 0; }
+    .club-main .name { font-weight: 600; }
+    .club-main .sub { font-size: 12px; color: var(--muted); margin-top: 2px; }
+    .club-dist { text-align: right; }
+    .club-dist .big { font-size: 22px; font-weight: 700; }
+    .club-dist .unit { font-size: 12px; color: var(--muted); }
+    .trend { font-size: 12px; margin-top: 2px; }
+    .trend.up { color: var(--accent); }
+    .trend.down { color: var(--danger); }
+    .trend.flat { color: var(--muted); }
+
+    /* gap-to-pro bar */
+    .bar-wrap { margin-top: 10px; height: 8px; background: var(--panel-2); border-radius: 6px; overflow: hidden; position: relative; }
+    .bar-you { height: 100%; background: linear-gradient(90deg, var(--accent-2), var(--accent)); border-radius: 6px; }
+    .bar-pro-mark { position: absolute; top: -3px; width: 2px; height: 14px; background: var(--pro); }
+
+    /* history */
+    .hist-group h3 { margin: 18px 0 8px; font-size: 14px; color: var(--muted); font-weight: 600; }
+    .hist-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--line); }
+    .hist-item:last-child { border-bottom: none; }
+    .hist-item .date { font-size: 12px; color: var(--muted); }
+    .hist-item .val { font-weight: 700; font-size: 16px; }
+    .del { background: none; border: none; color: var(--danger); width: auto; padding: 6px 8px; font-size: 13px; }
+    .empty { text-align: center; color: var(--muted); padding: 40px 20px; }
+    .empty .big { font-size: 40px; margin-bottom: 8px; }
+
+    /* analytics chart */
+    .chart { width: 100%; height: 200px; }
+    .chart-legend { display: flex; gap: 16px; font-size: 12px; color: var(--muted); margin-top: 8px; flex-wrap: wrap; }
+    .chart-legend span { display: inline-flex; align-items: center; gap: 6px; }
+    .dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+    .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 4px; }
+    .stat { background: var(--panel-2); border: 1px solid var(--line); border-radius: 12px; padding: 12px; }
+    .stat .k { font-size: 12px; color: var(--muted); }
+    .stat .v { font-size: 20px; font-weight: 700; margin-top: 2px; }
+
+    /* bottom nav */
+    nav {
+      position: fixed; bottom: 0; left: 0; right: 0;
+      display: flex; background: var(--panel); border-top: 1px solid var(--line);
+      padding-bottom: env(safe-area-inset-bottom);
+    }
+    nav button {
+      flex: 1; background: none; border: none; color: var(--muted);
+      padding: 12px 0 10px; font-size: 11px; border-radius: 0; display: flex; flex-direction: column; align-items: center; gap: 4px;
+    }
+    nav button svg { width: 22px; height: 22px; }
+    nav button.active { color: var(--accent); }
+    .section-title { font-size: 15px; font-weight: 700; margin: 4px 2px 12px; }
+    .toast {
+      position: fixed; bottom: 92px; left: 50%; transform: translateX(-50%);
+      background: var(--accent); color: #04120b; padding: 10px 18px; border-radius: 20px;
+      font-weight: 600; font-size: 14px; opacity: 0; transition: opacity .2s; pointer-events: none; z-index: 50;
+    }
+    .toast.show { opacity: 1; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>⛳ Fairway</h1>
+    <p>Track your club distances &amp; chase the pros</p>
+  </header>
+
+  <main>
+    <!-- LOG VIEW -->
+    <section id="view-log">
+      <div class="card">
+        <div class="section-title">Log a distance</div>
+        <label for="club">Club</label>
+        <select id="club"></select>
+
+        <div class="row" style="margin-top:12px">
+          <div>
+            <label for="dist">Distance (yd)</label>
+            <input id="dist" type="number" inputmode="numeric" min="0" max="450" placeholder="e.g. 165" />
+          </div>
+          <div>
+            <label for="date">Date</label>
+            <input id="date" type="date" />
+          </div>
+        </div>
+
+        <div class="pro-hint" id="proHint"></div>
+        <button class="btn-primary" id="saveBtn">Save distance</button>
+      </div>
+
+      <div class="section-title">Your bag</div>
+      <div id="bag"></div>
+    </section>
+
+    <!-- HISTORY VIEW -->
+    <section id="view-history" class="hidden">
+      <div class="section-title">History</div>
+      <div class="card">
+        <label for="histClub">Filter by club</label>
+        <select id="histClub"><option value="all">All clubs</option></select>
+      </div>
+      <div id="histList"></div>
+    </section>
+
+    <!-- ANALYTICS VIEW -->
+    <section id="view-analytics" class="hidden">
+      <div class="section-title">Analytics</div>
+      <div class="card">
+        <label for="anClub">Club</label>
+        <select id="anClub"></select>
+        <svg class="chart" id="chart" viewBox="0 0 320 200" preserveAspectRatio="none"></svg>
+        <div class="chart-legend">
+          <span><i class="dot" style="background:var(--accent)"></i> Your distance</span>
+          <span><i class="dot" style="background:var(--pro)"></i> Pro target</span>
+        </div>
+      </div>
+      <div class="stat-grid" id="statGrid"></div>
+    </section>
+  </main>
+
+  <div class="toast" id="toast"></div>
+
+  <nav>
+    <button data-view="log" class="active">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v18M12 3l7 3-7 3"/></svg>
+      Log
+    </button>
+    <button data-view="history">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 8v4l3 2"/><circle cx="12" cy="12" r="9"/></svg>
+      History
+    </button>
+    <button data-view="analytics">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>
+      Analytics
+    </button>
+  </nav>
+
+  <script src="data.js"></script>
+  <script src="app.js"></script>
+  <script>
+    if ("serviceWorker" in navigator) {
+      window.addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
+    }
+  </script>
+</body>
+</html>
