@@ -195,6 +195,10 @@
     #chart text.ref-pro { fill: var(--pro); stroke: none; }
     #chart .series { stroke: var(--accent); }
     #chart .series-dot { fill: var(--accent); }
+    /* gradient stops must be styled here — var() does not resolve in an
+       SVG stop-color presentation attribute */
+    #chart .g-top { stop-color: var(--accent); stop-opacity: .28; }
+    #chart .g-bot { stop-color: var(--accent); stop-opacity: 0; }
     #chart .chart-empty { fill: var(--muted); }
     .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 4px; }
     .stat { background: var(--panel-2); border: 1px solid var(--line); border-radius: 12px; padding: 12px; }

@@ -479,8 +479,8 @@
     svg.innerHTML = `
       <defs>
         <linearGradient id="fill" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0" stop-color="#35d07f" stop-opacity="0.28"/>
-          <stop offset="1" stop-color="#35d07f" stop-opacity="0"/>
+          <stop class="g-top" offset="0"/>
+          <stop class="g-bot" offset="1"/>
         </linearGradient>
       </defs>
       <line class="ref-std" x1="${pad}" y1="${stdY}" x2="${W - pad}" y2="${stdY}" stroke-width="1.5" stroke-dasharray="3 3"/>
