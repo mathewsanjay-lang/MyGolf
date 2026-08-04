@@ -118,6 +118,7 @@
     renderBag();
     renderHistory();
     renderAnalytics();
+    renderDataMeta();
   }
 
   // ---- selects ----
@@ -385,6 +386,63 @@
     toast(`Saved ${clubById[club].name}: ${dist} ${UNIT}`);
   }
 
+  // ================= DATA CONTROLS =================
+
+  // Four rounds of plausible mid-handicap numbers, derived from each club's
+  // standard so the shape of the bag stays realistic. Purely for trying the
+  // app out before you have your own shots logged.
+  function sampleEntries() {
+    const rounds = 4;
+    const out = [];
+    const today = new Date();
+    for (let r = 0; r < rounds; r++) {
+      const d = new Date(today);
+      d.setDate(d.getDate() - (rounds - 1 - r) * 7); // weekly, ending today
+      const date = d.toISOString().slice(0, 10);
+      CLUBS.forEach((c) => {
+        // ~92% of standard, drifting up slightly each round, plus jitter
+        const base = Math.round(c.standard * 0.92 + r * 1.5);
+        const jitter = [-3, 2, -1, 4, 0][(r + c.short.length) % 5];
+        out.push({
+          id: newId(),
+          club: c.id,
+          dist: Math.max(1, base + jitter),
+          date,
+          at: d.getTime() + out.length,
+        });
+      });
+    }
+    return out;
+  }
+
+  function renderDataMeta() {
+    $("#dataMeta").textContent = entries.length
+      ? `${entries.length} shot${entries.length === 1 ? "" : "s"} across ${clubsLogged()} club${clubsLogged() === 1 ? "" : "s"}`
+      : "No data yet.";
+  }
+
+  function loadSample() {
+    if (entries.length &&
+        !confirm(`This replaces your ${entries.length} logged shot${entries.length === 1 ? "" : "s"} with sample data. Continue?`)) {
+      return;
+    }
+    entries = sampleEntries();
+    lastDeleted = null;
+    save();
+    renderAll();
+    toast(`Loaded ${entries.length} sample shots`);
+  }
+
+  function clearAll() {
+    if (!entries.length) { toast("Nothing to clear"); return; }
+    if (!confirm(`Delete all ${entries.length} logged shots? This can't be undone.`)) return;
+    entries = [];
+    lastDeleted = null;
+    save();
+    renderAll();
+    toast("All data cleared");
+  }
+
   // ================= HISTORY =================
   function renderHistory() {
     const filter = $("#histClub").value;
@@ -550,6 +608,8 @@
     $("#findDist").addEventListener("input", renderFinder);
     $("#histClub").addEventListener("change", renderHistory);
     $("#anClub").addEventListener("change", renderAnalytics);
+    $("#sampleBtn").addEventListener("click", loadSample);
+    $("#clearBtn").addEventListener("click", clearAll);
     document.querySelectorAll("nav button").forEach((b) =>
       b.addEventListener("click", () => switchView(b.dataset.view)));
 

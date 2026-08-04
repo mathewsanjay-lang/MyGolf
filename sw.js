@@ -2,7 +2,7 @@
 //
 // IMPORTANT: bump CACHE on every change to index.html / app.js / data.js.
 // Changing this file's bytes is what makes the browser re-run install.
-const CACHE = "fairway-v5";
+const CACHE = "fairway-v6";
 
 // "./" covers index.html (cleanUrls redirects /index.html -> /), so don't
 // list index.html separately — addAll is all-or-nothing and a redirected
