@@ -68,6 +68,26 @@
     return Math.round(list.reduce((s, e) => s + e.dist, 0) / list.length);
   }
 
+  // Typical carry — the number you club off. Median of your last 5 entries:
+  // recent, so it tracks your current form, and a median so one flushed or
+  // one chunked shot can't drag it around the way a mean would.
+  function typicalFor(clubId) {
+    const list = entriesFor(clubId);
+    if (!list.length) return null;
+    const recent = list.slice(-5).map((e) => e.dist).sort((a, b) => a - b);
+    const m = Math.floor(recent.length / 2);
+    return recent.length % 2
+      ? recent[m]
+      : Math.round((recent[m - 1] + recent[m]) / 2);
+  }
+
+  function bestFor(clubId) {
+    const list = entriesFor(clubId);
+    return list.length ? Math.max(...list.map((e) => e.dist)) : null;
+  }
+
+  const clubsLogged = () => CLUBS.filter((c) => entriesFor(c.id).length).length;
+
   let toastTimer;
   function toast(msg, actionLabel, actionFn) {
     const t = $("#toast");
@@ -113,12 +133,12 @@
 
   // ================= CHEAT SHEET =================
 
-  // What we'd trust on the course: your average if you have data, else the
-  // standard benchmark for the club.
+  // What we'd trust on the course: your typical carry if you have data, else
+  // the standard benchmark for the club.
   function referenceFor(c) {
-    const avg = avgFor(c.id);
-    return avg !== null
-      ? { value: avg, source: "you" }
+    const typ = typicalFor(c.id);
+    return typ !== null
+      ? { value: typ, source: "you" }
       : { value: c.standard, source: "standard" };
   }
 
@@ -156,7 +176,7 @@
       : d > 0 ? `${d} ${UNIT} more than your ${c.short}`
       : `${-d} ${UNIT} less than your ${c.short}`;
     const src = best.ref.source === "you"
-      ? `your average ${best.ref.value} ${UNIT}`
+      ? `you carry it ${best.ref.value} ${UNIT}`
       : `standard ${best.ref.value} ${UNIT} — no data logged yet`;
 
     box.innerHTML = `
@@ -189,7 +209,7 @@
     const H = axisH + CLUBS.length * rowH + botPad;
 
     // x domain covers the longest reference on the chart (pro distances)
-    const rawMax = Math.max(...CLUBS.map((c) => Math.max(c.pro, c.standard, avgFor(c.id) || 0)));
+    const rawMax = Math.max(...CLUBS.map((c) => Math.max(c.pro, c.standard, bestFor(c.id) || 0)));
     const xMax = Math.ceil(rawMax / 50) * 50 || 50;
     const x = (v) => plotX0 + (Math.max(0, Math.min(v, xMax)) / xMax) * (plotX1 - plotX0);
 
@@ -205,7 +225,7 @@
       const yTop = axisH + i * rowH;
       const yc = yTop + rowH / 2;
       const barY = yc - 5;
-      const avg = avgFor(c.id);
+      const avg = typicalFor(c.id);
 
       if (highlightedClub === c.id) {
         g += `<rect class="hl" x="0" y="${yTop}" width="${W}" height="${rowH}" rx="4"/>`;
@@ -233,28 +253,32 @@
 
   function renderCheatTable() {
     const body = $("#cheatBody");
+    const logged = clubsLogged();
+
+    $("#summaryMeta").textContent = logged
+      ? `${logged} of ${CLUBS.length} clubs logged · ${entries.length} shot${entries.length === 1 ? "" : "s"} recorded`
+      : "Nothing logged yet — the Std column is your benchmark until you do.";
+
     const rows = CLUBS.map((c, i) => {
-      const avg = avgFor(c.id);
-      // gap to the next shorter club, using the same reference basis
+      const typ = typicalFor(c.id);
+      const best = bestFor(c.id);
+      // gap to the next shorter club, on the same basis
       let gap = "—", gapCls = "dash";
       const next = CLUBS[i + 1];
       if (next) {
-        const a = avg, b = avgFor(next.id);
-        if (a !== null && b !== null) { gap = (a - b) + ""; gapCls = ""; }
+        const b = typicalFor(next.id);
+        if (typ !== null && b !== null) { gap = (typ - b) + ""; gapCls = ""; }
       }
-      const vs = avg === null ? null : avg - c.standard;
-      const youCell = avg === null
-        ? '<td class="you dash">—</td>'
-        : `<td class="you">${avg}</td>`;
-      const stdCell = `<td class="std">${c.standard}${
-        vs === null ? "" : ` <span class="${vs >= 0 ? "pos" : "neg"}">${vs >= 0 ? "+" : ""}${vs}</span>`
-      }</td>`;
+      const vs = typ === null ? null : typ - c.standard;
       // Numbered irons need no gloss ("5i" is unambiguous); the others do.
       const sub = SUB_LABEL[c.id] || "";
       return `<tr class="${highlightedClub === c.id ? "row-hl" : ""}">
         <td>${c.short}${sub ? ` <span style="color:var(--muted);font-size:11px">${sub}</span>` : ""}</td>
-        ${youCell}
-        ${stdCell}
+        ${typ === null ? '<td class="you dash">—</td>' : `<td class="you">${typ}</td>`}
+        ${best === null ? '<td class="dash">—</td>' : `<td>${best}</td>`}
+        <td class="std">${c.standard}${
+          vs === null ? "" : ` <span class="${vs >= 0 ? "pos" : "neg"}">${vs >= 0 ? "+" : ""}${vs}</span>`
+        }</td>
         <td class="pro">${c.pro}</td>
         <td class="${gapCls}">${gap}</td>
       </tr>`;

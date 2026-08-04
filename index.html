@@ -248,9 +248,11 @@
     <!-- ============ CHEAT SHEET (default) ============ -->
     <section id="view-cheat">
       <div class="card">
-        <label for="findDist">What club for this distance?</label>
+        <div class="card-title">Which club?</div>
+        <div class="card-sub">Enter the distance to the pin — we'll pick the club.</div>
         <div class="finder-row">
-          <input id="findDist" type="number" inputmode="numeric" min="1" max="450" placeholder="e.g. 150" />
+          <input id="findDist" type="number" inputmode="numeric" min="1" max="450"
+                 placeholder="150" aria-label="Distance to the pin in yards" />
           <span class="finder-unit">yd</span>
         </div>
         <div class="find-result" id="findResult"></div>
@@ -261,26 +263,28 @@
         <div class="card-sub">Read across to your number, then take that club.</div>
         <svg class="bag-chart" id="bagChart" role="img" aria-label="All clubs by distance"></svg>
         <div class="chart-legend">
-          <span><i class="bar-key" style="background:var(--accent)"></i> Your average</span>
+          <span><i class="bar-key" style="background:var(--accent)"></i> Your carry</span>
           <span><i class="bar-key" style="background:var(--std)"></i> Standard</span>
           <span><i class="bar-key" style="background:var(--pro)"></i> Pro</span>
         </div>
       </div>
 
       <div class="card">
-        <div class="card-title">Cheat sheet</div>
+        <div class="card-title">What you hit</div>
+        <div class="card-sub" id="summaryMeta"></div>
         <div class="table-scroll">
           <table class="cheat">
             <thead>
               <tr>
-                <th>Club</th><th>You</th><th>Std</th><th>Pro</th><th>Gap</th>
+                <th>Club</th><th>Carry</th><th>Best</th><th>Std</th><th>Pro</th><th>Gap</th>
               </tr>
             </thead>
             <tbody id="cheatBody"></tbody>
           </table>
         </div>
         <div class="card-sub" style="margin:10px 0 0">
-          <b>You</b> = your average. <b>Gap</b> = yards between this club and the next shorter one.
+          <b>Carry</b> = your typical carry (median of your last 5), the number to club off.
+          <b>Gap</b> = yards between this club and the next shorter one — a big gap is a hole in your bag.
         </div>
       </div>
 
@@ -348,7 +352,7 @@
   <nav>
     <button data-view="cheat" class="active">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h10M4 18h13"/></svg>
-      Cheat
+      Summary
     </button>
     <button data-view="log">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v18M12 3l7 3-7 3"/></svg>
