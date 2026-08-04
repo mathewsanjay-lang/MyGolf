@@ -11,8 +11,8 @@ window.GOLF_CLUBS = [
   { id: "iron6",    name: "6 Iron",         short: "6i",  standard: 150, pro: 183 },
   { id: "iron7",    name: "7 Iron",         short: "7i",  standard: 140, pro: 172 },
   { id: "iron8",    name: "8 Iron",         short: "8i",  standard: 130, pro: 160 },
-  { id: "iron9",    name: "9 Iron",         short: "9i",  standard: 115, pro: 148 },
-  { id: "pw",       name: "Pitching Wedge", short: "PW",  standard: 105, pro: 136 },
+  { id: "iron9",    name: "9 Iron",         short: "9i",  standard: 120, pro: 148 },
+  { id: "pw",       name: "Pitching Wedge", short: "PW",  standard: 110, pro: 136 },
   { id: "sw",       name: "Sand Wedge",     short: "SW",  standard: 80,  pro: 110 },
 ];
 

@@ -7,7 +7,7 @@
   <title>Fairway — Golf Club Distances</title>
   <link rel="manifest" href="manifest.webmanifest" />
   <link rel="icon" href="icon.svg" type="image/svg+xml" />
-  <link rel="apple-touch-icon" href="icon.svg" />
+  <link rel="apple-touch-icon" sizes="180x180" href="icon-180.png" />
   <style>
     :root {
       --bg: #0b1f17;
@@ -50,6 +50,8 @@
       padding: 14px;
       margin-bottom: 14px;
     }
+    .card-title { font-size: 14px; font-weight: 700; margin-bottom: 10px; }
+    .card-sub { font-size: 12px; color: var(--muted); margin: -6px 0 10px; }
     label { display: block; font-size: 13px; color: var(--muted); margin-bottom: 6px; }
     select, input[type="number"], input[type="date"] {
       width: 100%; padding: 13px; font-size: 16px;
@@ -57,6 +59,9 @@
       border: 1px solid var(--line); border-radius: 12px; outline: none;
     }
     select:focus, input:focus { border-color: var(--accent); }
+    button:focus-visible, select:focus-visible, input:focus-visible {
+      outline: 2px solid var(--accent); outline-offset: 2px;
+    }
     .row { display: flex; gap: 10px; }
     .row > div { flex: 1; }
     button {
@@ -65,16 +70,80 @@
     }
     .btn-primary { background: var(--accent); color: #04120b; margin-top: 12px; }
     .btn-primary:active { background: var(--accent-2); }
-    .btn-ghost { background: transparent; color: var(--muted); border: 1px solid var(--line); }
 
     .pro-hint {
       margin-top: 12px; padding: 10px 12px; border-radius: 12px;
       background: rgba(242,193,78,.1); border: 1px solid rgba(242,193,78,.3);
-      font-size: 13px; color: var(--pro); display: flex; justify-content: space-between; align-items: center;
+      font-size: 13px; color: var(--pro);
     }
-    .pro-hint b { font-size: 16px; }
+    .pro-hint b { font-weight: 700; font-size: inherit; }
 
-    /* club summary cards */
+    /* ---------- cheat sheet: club finder ---------- */
+    .finder-row { display: flex; align-items: center; gap: 10px; }
+    .finder-row input { font-size: 22px; font-weight: 700; text-align: center; }
+    .finder-unit { color: var(--muted); font-size: 14px; }
+    .find-result { margin-top: 12px; }
+    .find-hit {
+      display: flex; align-items: center; gap: 12px;
+      padding: 12px; border-radius: 12px;
+      background: rgba(53,208,127,.12); border: 1px solid rgba(53,208,127,.35);
+    }
+    .find-hit .badge {
+      width: 52px; height: 52px; flex: none; border-radius: 12px;
+      background: var(--accent); color: #04120b;
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 800; font-size: 18px;
+    }
+    .find-hit .fname { font-weight: 700; font-size: 17px; }
+    .find-hit .fsub { font-size: 12px; color: var(--muted); margin-top: 2px; }
+    .find-alt { display: flex; gap: 8px; margin-top: 8px; }
+    .find-alt div {
+      flex: 1; padding: 8px 10px; border-radius: 10px;
+      background: var(--panel-2); border: 1px solid var(--line);
+      font-size: 12px; color: var(--muted);
+    }
+    .find-alt b { color: var(--text); display: block; font-size: 13px; }
+    .find-empty { color: var(--muted); font-size: 13px; }
+
+    /* ---------- cheat sheet: full bag chart ---------- */
+    .bag-chart { width: 100%; height: auto; display: block; }
+    .bag-chart .grid { stroke: var(--line); stroke-width: 1; }
+    .bag-chart .axis-label { fill: var(--muted); font-size: 9px; }
+    .bag-chart .club-label { fill: var(--text); font-size: 10px; font-weight: 600; }
+    .bag-chart .track { fill: var(--panel-2); }
+    .bag-chart .fill-you { fill: var(--accent); }
+    .bag-chart .fill-none { fill: var(--line); }
+    .bag-chart .tick-std { stroke: var(--std); stroke-width: 2; }
+    .bag-chart .tick-pro { stroke: var(--pro); stroke-width: 2; }
+    .bag-chart .val { fill: var(--text); font-size: 10px; font-weight: 700; }
+    .bag-chart .val-none { fill: var(--muted); font-size: 10px; }
+    .bag-chart .hl { fill: rgba(53,208,127,.14); }
+
+    .chart-legend { display: flex; gap: 14px; font-size: 12px; color: var(--muted); margin-top: 10px; flex-wrap: wrap; }
+    .chart-legend span { display: inline-flex; align-items: center; gap: 6px; }
+    .dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+    .bar-key { width: 12px; height: 3px; border-radius: 2px; display: inline-block; }
+
+    /* ---------- cheat sheet: table ---------- */
+    .table-scroll { overflow-x: auto; }
+    table.cheat { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
+    table.cheat th, table.cheat td { padding: 9px 6px; text-align: right; font-size: 13px; }
+    table.cheat th {
+      font-size: 10px; text-transform: uppercase; letter-spacing: .6px;
+      color: var(--muted); font-weight: 600; border-bottom: 1px solid var(--line);
+    }
+    table.cheat th:first-child, table.cheat td:first-child { text-align: left; }
+    table.cheat tbody tr { border-bottom: 1px solid rgba(35,70,58,.6); }
+    table.cheat tbody tr:last-child { border-bottom: none; }
+    table.cheat td.you { font-weight: 700; font-size: 15px; }
+    table.cheat td.std { color: var(--std); }
+    table.cheat td.pro { color: var(--pro); }
+    table.cheat td.dash { color: var(--muted); }
+    table.cheat .pos { color: var(--accent); }
+    table.cheat .neg { color: var(--danger); }
+    table.cheat tr.row-hl { background: rgba(53,208,127,.12); }
+
+    /* ---------- bag cards (log view) ---------- */
     .club-card { display: flex; align-items: center; gap: 12px; }
     .club-badge {
       width: 46px; height: 46px; flex: none; border-radius: 12px;
@@ -85,48 +154,65 @@
     .club-main .name { font-weight: 600; }
     .club-main .sub { font-size: 12px; color: var(--muted); margin-top: 2px; }
     .club-dist { text-align: right; }
-    .club-dist .big { font-size: 22px; font-weight: 700; }
+    .club-dist .big { font-size: 22px; font-weight: 700; font-variant-numeric: tabular-nums; }
     .club-dist .unit { font-size: 12px; color: var(--muted); }
     .trend { font-size: 12px; margin-top: 2px; }
     .trend.up { color: var(--accent); }
     .trend.down { color: var(--danger); }
     .trend.flat { color: var(--muted); }
 
-    /* gap-to-pro bar */
-    .bar-wrap { margin-top: 10px; height: 8px; background: var(--panel-2); border-radius: 6px; overflow: hidden; position: relative; }
-    .bar-you { height: 100%; background: linear-gradient(90deg, var(--accent-2), var(--accent)); border-radius: 6px; }
-    .bar-std-mark { position: absolute; top: -3px; width: 2px; height: 14px; background: var(--std); }
-    .bar-pro-mark { position: absolute; top: -3px; width: 2px; height: 14px; background: var(--pro); }
+    /* progress bar. NOTE: no overflow:hidden here — it would clip the
+       standard/pro tick marks, which deliberately overhang the bar. */
+    .bar-wrap { margin-top: 12px; height: 8px; background: var(--panel-2); border-radius: 6px; position: relative; }
+    .bar-you { height: 100%; background: linear-gradient(90deg, var(--accent-2), var(--accent)); border-radius: 6px; max-width: 100%; }
+    .bar-std-mark { position: absolute; top: -3px; width: 2px; height: 14px; background: var(--std); border-radius: 1px; }
+    .bar-pro-mark { position: absolute; top: -3px; width: 2px; height: 14px; background: var(--pro); border-radius: 1px; }
 
-    /* history */
+    /* ---------- history ---------- */
     .hist-group h3 { margin: 18px 0 8px; font-size: 14px; color: var(--muted); font-weight: 600; }
-    .hist-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--line); }
+    .hist-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--line); gap: 8px; }
     .hist-item:last-child { border-bottom: none; }
     .hist-item .date { font-size: 12px; color: var(--muted); }
-    .hist-item .val { font-weight: 700; font-size: 16px; }
-    .del { background: none; border: none; color: var(--danger); width: auto; padding: 6px 8px; font-size: 13px; }
-    .empty { text-align: center; color: var(--muted); padding: 40px 20px; }
+    .hist-item .val { font-weight: 700; font-size: 16px; font-variant-numeric: tabular-nums; }
+    .del {
+      background: none; border: none; color: var(--danger); width: auto;
+      padding: 12px 14px; margin: -6px -8px -6px 0; font-size: 13px; min-height: 44px;
+    }
+    .empty { text-align: center; color: var(--muted); padding: 36px 20px; font-size: 14px; }
     .empty .big { font-size: 40px; margin-bottom: 8px; }
+    .compact-hist { font-variant-numeric: tabular-nums; }
+    .compact-hist .ch-row { display: flex; justify-content: space-between; align-items: baseline; padding: 8px 0; border-bottom: 1px solid rgba(35,70,58,.6); font-size: 13px; }
+    .compact-hist .ch-row:last-child { border-bottom: none; }
+    .compact-hist .ch-date { color: var(--muted); font-size: 12px; min-width: 62px; }
+    .compact-hist .ch-club { flex: 1; padding: 0 10px; }
+    .compact-hist .ch-val { font-weight: 700; }
 
-    /* analytics chart */
+    /* ---------- analytics ---------- */
     .chart { width: 100%; height: 200px; }
-    .chart-legend { display: flex; gap: 16px; font-size: 12px; color: var(--muted); margin-top: 8px; flex-wrap: wrap; }
-    .chart-legend span { display: inline-flex; align-items: center; gap: 6px; }
-    .dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+    #chart .ref-std { stroke: var(--std); }
+    #chart text.ref-std { fill: var(--std); stroke: none; }
+    #chart .ref-pro { stroke: var(--pro); }
+    #chart text.ref-pro { fill: var(--pro); stroke: none; }
+    #chart .series { stroke: var(--accent); }
+    #chart .series-dot { fill: var(--accent); }
+    #chart .chart-empty { fill: var(--muted); }
     .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 4px; }
     .stat { background: var(--panel-2); border: 1px solid var(--line); border-radius: 12px; padding: 12px; }
     .stat .k { font-size: 12px; color: var(--muted); }
-    .stat .v { font-size: 20px; font-weight: 700; margin-top: 2px; }
+    .stat .v { font-size: 20px; font-weight: 700; margin-top: 2px; font-variant-numeric: tabular-nums; }
+    /* an odd final tile would leave a ragged half-row — let it span */
+    .stat-grid .stat:last-child:nth-child(odd) { grid-column: 1 / -1; }
 
-    /* bottom nav */
+    /* ---------- nav ---------- */
     nav {
       position: fixed; bottom: 0; left: 0; right: 0;
       display: flex; background: var(--panel); border-top: 1px solid var(--line);
-      padding-bottom: env(safe-area-inset-bottom);
+      padding-bottom: env(safe-area-inset-bottom); z-index: 20;
     }
     nav button {
       flex: 1; background: none; border: none; color: var(--muted);
-      padding: 12px 0 10px; font-size: 11px; border-radius: 0; display: flex; flex-direction: column; align-items: center; gap: 4px;
+      padding: 10px 0 8px; font-size: 11px; border-radius: 0;
+      display: flex; flex-direction: column; align-items: center; gap: 4px; min-height: 56px;
     }
     nav button svg { width: 22px; height: 22px; }
     nav button.active { color: var(--accent); }
@@ -134,9 +220,18 @@
     .toast {
       position: fixed; bottom: 92px; left: 50%; transform: translateX(-50%);
       background: var(--accent); color: #04120b; padding: 10px 18px; border-radius: 20px;
-      font-weight: 600; font-size: 14px; opacity: 0; transition: opacity .2s; pointer-events: none; z-index: 50;
+      font-weight: 600; font-size: 14px; opacity: 0; transition: opacity .2s;
+      pointer-events: none; z-index: 50; display: flex; align-items: center; gap: 12px;
+      max-width: calc(100% - 28px);
     }
-    .toast.show { opacity: 1; }
+    .toast.show { opacity: 1; pointer-events: auto; }
+    .toast button {
+      width: auto; padding: 4px 10px; font-size: 13px; border-radius: 14px;
+      background: #04120b; color: var(--accent); min-height: 0;
+    }
+    @media (prefers-reduced-motion: reduce) {
+      * { transition: none !important; animation: none !important; }
+    }
   </style>
 </head>
 <body>
@@ -146,8 +241,53 @@
   </header>
 
   <main>
-    <!-- LOG VIEW -->
-    <section id="view-log">
+    <!-- ============ CHEAT SHEET (default) ============ -->
+    <section id="view-cheat">
+      <div class="card">
+        <label for="findDist">What club for this distance?</label>
+        <div class="finder-row">
+          <input id="findDist" type="number" inputmode="numeric" min="1" max="450" placeholder="e.g. 150" />
+          <span class="finder-unit">yd</span>
+        </div>
+        <div class="find-result" id="findResult"></div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Full bag</div>
+        <div class="card-sub">Read across to your number, then take that club.</div>
+        <svg class="bag-chart" id="bagChart" role="img" aria-label="All clubs by distance"></svg>
+        <div class="chart-legend">
+          <span><i class="bar-key" style="background:var(--accent)"></i> Your average</span>
+          <span><i class="bar-key" style="background:var(--std)"></i> Standard</span>
+          <span><i class="bar-key" style="background:var(--pro)"></i> Pro</span>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Cheat sheet</div>
+        <div class="table-scroll">
+          <table class="cheat">
+            <thead>
+              <tr>
+                <th>Club</th><th>You</th><th>Std</th><th>Pro</th><th>Gap</th>
+              </tr>
+            </thead>
+            <tbody id="cheatBody"></tbody>
+          </table>
+        </div>
+        <div class="card-sub" style="margin:10px 0 0">
+          <b>You</b> = your average. <b>Gap</b> = yards between this club and the next shorter one.
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Recent logs</div>
+        <div class="compact-hist" id="cheatHistory"></div>
+      </div>
+    </section>
+
+    <!-- ============ LOG ============ -->
+    <section id="view-log" class="hidden">
       <div class="card">
         <div class="section-title">Log a distance</div>
         <label for="club">Club</label>
@@ -156,7 +296,7 @@
         <div class="row" style="margin-top:12px">
           <div>
             <label for="dist">Distance (yd)</label>
-            <input id="dist" type="number" inputmode="numeric" min="0" max="450" placeholder="e.g. 165" />
+            <input id="dist" type="number" inputmode="numeric" min="1" max="450" placeholder="e.g. 165" />
           </div>
           <div>
             <label for="date">Date</label>
@@ -172,23 +312,23 @@
       <div id="bag"></div>
     </section>
 
-    <!-- HISTORY VIEW -->
+    <!-- ============ HISTORY ============ -->
     <section id="view-history" class="hidden">
       <div class="section-title">History</div>
       <div class="card">
         <label for="histClub">Filter by club</label>
-        <select id="histClub"><option value="all">All clubs</option></select>
+        <select id="histClub"></select>
       </div>
       <div id="histList"></div>
     </section>
 
-    <!-- ANALYTICS VIEW -->
+    <!-- ============ ANALYTICS ============ -->
     <section id="view-analytics" class="hidden">
       <div class="section-title">Analytics</div>
       <div class="card">
         <label for="anClub">Club</label>
         <select id="anClub"></select>
-        <svg class="chart" id="chart" viewBox="0 0 320 200" preserveAspectRatio="none"></svg>
+        <svg class="chart" id="chart" viewBox="0 0 320 200"></svg>
         <div class="chart-legend">
           <span><i class="dot" style="background:var(--accent)"></i> Your distance</span>
           <span><i class="dot" style="background:var(--std)"></i> Standard</span>
@@ -202,7 +342,11 @@
   <div class="toast" id="toast"></div>
 
   <nav>
-    <button data-view="log" class="active">
+    <button data-view="cheat" class="active">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h10M4 18h13"/></svg>
+      Cheat
+    </button>
+    <button data-view="log">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v18M12 3l7 3-7 3"/></svg>
       Log
     </button>
@@ -220,7 +364,11 @@
   <script src="app.js"></script>
   <script>
     if ("serviceWorker" in navigator) {
-      window.addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
+      window.addEventListener("load", () =>
+        navigator.serviceWorker.register("sw.js").catch((err) =>
+          console.error("Service worker registration failed:", err)
+        )
+      );
     }
   </script>
 </body>
