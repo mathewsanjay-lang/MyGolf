@@ -18,6 +18,7 @@
       --muted: #9fc0b1;
       --accent: #35d07f;
       --accent-2: #2bb673;
+      --std: #6ab7ff;
       --pro: #f2c14e;
       --danger: #ff6b6b;
       --radius: 16px;
@@ -94,6 +95,7 @@
     /* gap-to-pro bar */
     .bar-wrap { margin-top: 10px; height: 8px; background: var(--panel-2); border-radius: 6px; overflow: hidden; position: relative; }
     .bar-you { height: 100%; background: linear-gradient(90deg, var(--accent-2), var(--accent)); border-radius: 6px; }
+    .bar-std-mark { position: absolute; top: -3px; width: 2px; height: 14px; background: var(--std); }
     .bar-pro-mark { position: absolute; top: -3px; width: 2px; height: 14px; background: var(--pro); }
 
     /* history */
@@ -140,7 +142,7 @@
 <body>
   <header>
     <h1>⛳ Fairway</h1>
-    <p>Track your club distances &amp; chase the pros</p>
+    <p id="setName">Track your club distances &amp; chase the pros</p>
   </header>
 
   <main>
@@ -189,6 +191,7 @@
         <svg class="chart" id="chart" viewBox="0 0 320 200" preserveAspectRatio="none"></svg>
         <div class="chart-legend">
           <span><i class="dot" style="background:var(--accent)"></i> Your distance</span>
+          <span><i class="dot" style="background:var(--std)"></i> Standard</span>
           <span><i class="dot" style="background:var(--pro)"></i> Pro target</span>
         </div>
       </div>

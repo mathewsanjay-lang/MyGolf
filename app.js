@@ -58,9 +58,9 @@
     const c = clubById[$("#club").value];
     if (!c) return;
     const last = latestFor(c.id);
-    const you = last ? `You: ${last.dist} ${UNIT}` : "No entry yet";
+    const you = last ? `${last.dist} ${UNIT}` : "—";
     $("#proHint").innerHTML =
-      `<span>🎯 Pro target · ${you}</span><b>${c.pro} ${UNIT}</b>`;
+      `<span>You <b>${you}</b> · Standard <b>${c.standard}</b> · Pro <b>${c.pro}</b> ${UNIT}</span>`;
   }
 
   function renderBag() {
@@ -82,16 +82,19 @@
         trendHtml = `<div class="trend ${cls}">${arrow} ${diff > 0 ? "+" : ""}${diff} vs last</div>`;
       }
 
-      const pct = last ? Math.min(100, Math.round((last.dist / c.pro) * 100)) : 0;
+      const scale = c.pro; // bar full width = pro distance
+      const pct = last ? Math.min(100, Math.round((last.dist / scale) * 100)) : 0;
+      const stdPct = Math.min(100, Math.round((c.standard / scale) * 100));
 
       card.innerHTML = `
         <div class="club-badge">${c.short}</div>
         <div class="club-main">
           <div class="name">${c.name}</div>
-          <div class="sub">Pro ${c.pro} ${UNIT} · ${list.length} entr${list.length === 1 ? "y" : "ies"}</div>
+          <div class="sub">Standard ${c.standard} · Pro ${c.pro} ${UNIT} · ${list.length} entr${list.length === 1 ? "y" : "ies"}</div>
           <div class="bar-wrap">
             <div class="bar-you" style="width:${pct}%"></div>
-            <div class="bar-pro-mark" style="left:calc(100% - 1px)"></div>
+            <div class="bar-std-mark" style="left:calc(${stdPct}% - 1px)" title="Standard"></div>
+            <div class="bar-pro-mark" style="left:calc(100% - 1px)" title="Pro"></div>
           </div>
         </div>
         <div class="club-dist">
@@ -199,14 +202,15 @@
     const avg = Math.round(dists.reduce((a, b) => a + b, 0) / dists.length);
     const change = last - first;
     const gap = c.pro - last;
+    const gapStd = c.standard - last;
 
     grid.innerHTML = `
       <div class="stat"><div class="k">Latest</div><div class="v">${last} ${UNIT}</div></div>
       <div class="stat"><div class="k">Personal best</div><div class="v">${best} ${UNIT}</div></div>
       <div class="stat"><div class="k">Average</div><div class="v">${avg} ${UNIT}</div></div>
       <div class="stat"><div class="k">Change over time</div><div class="v" style="color:${change >= 0 ? "var(--accent)" : "var(--danger)"}">${change >= 0 ? "+" : ""}${change} ${UNIT}</div></div>
-      <div class="stat"><div class="k">Gap to pro</div><div class="v" style="color:var(--pro)">${gap > 0 ? gap + " " + UNIT : "Reached! 🎉"}</div></div>
-      <div class="stat"><div class="k">Entries</div><div class="v">${list.length}</div></div>`;
+      <div class="stat"><div class="k">Gap to standard</div><div class="v" style="color:var(--std)">${gapStd > 0 ? gapStd + " " + UNIT : "Reached! ✅"}</div></div>
+      <div class="stat"><div class="k">Gap to pro</div><div class="v" style="color:var(--pro)">${gap > 0 ? gap + " " + UNIT : "Reached! 🎉"}</div></div>`;
 
     // chart scaling — include pro line in range
     const maxV = Math.max(best, c.pro) * 1.05;
@@ -216,6 +220,7 @@
     const y = (v) => H - pad - ((v - minV) / range) * (H - pad * 2);
 
     const proY = y(c.pro);
+    const stdY = y(c.standard);
     const points = list.map((e, i) => `${x(i)},${y(e.dist)}`).join(" ");
     const dots = list.map((e, i) =>
       `<circle cx="${x(i)}" cy="${y(e.dist)}" r="3.5" fill="#35d07f"/>`).join("");
@@ -228,6 +233,8 @@
           <stop offset="1" stop-color="#35d07f" stop-opacity="0"/>
         </linearGradient>
       </defs>
+      <line x1="${pad}" y1="${stdY}" x2="${W - pad}" y2="${stdY}" stroke="#6ab7ff" stroke-width="1.5" stroke-dasharray="3 3"/>
+      <text x="${W - pad}" y="${stdY - 5}" fill="#6ab7ff" font-size="10" text-anchor="end">Standard ${c.standard}</text>
       <line x1="${pad}" y1="${proY}" x2="${W - pad}" y2="${proY}" stroke="#f2c14e" stroke-width="1.5" stroke-dasharray="5 4"/>
       <text x="${W - pad}" y="${proY - 5}" fill="#f2c14e" font-size="10" text-anchor="end">Pro ${c.pro}</text>
       ${list.length > 1 ? `<polygon points="${area}" fill="url(#fill)"/>` : ""}
@@ -252,6 +259,7 @@
     fillClubSelect($("#histClub"), true);
     fillClubSelect($("#anClub"), false);
     $("#date").value = todayStr();
+    if (window.GOLF_SET) $("#setName").textContent = "Set: " + window.GOLF_SET + " · Standard & Pro targets";
 
     $("#club").addEventListener("change", renderProHint);
     $("#saveBtn").addEventListener("click", saveEntry);
