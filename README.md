@@ -1,5 +1,7 @@
 # ⛳ Fairway — Golf Club Distance Tracker
 
+**Live:** https://fairway-golf-indol.vercel.app
+
 An installable phone app to record how far you hit each club, watch your
 distances improve, and compare yourself to standard and pro benchmarks.
 
