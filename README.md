@@ -58,7 +58,6 @@ average carry. Edit any of them in `data.js`.
 ## Run it locally
 
 ```bash
-cd golf
 python3 -m http.server 8080
 # open http://localhost:8080
 ```
@@ -70,20 +69,21 @@ Import the repo at [vercel.com/new](https://vercel.com/new), and in the
 
 | Setting | Value |
 |---|---|
-| **Root Directory** | `golf` |
+| Root Directory | leave as the repository root |
 | Framework Preset | Other |
 | Build / Install Command | leave blank |
 | Output Directory | leave blank |
 
-Root Directory = `golf` matters: the repository root contains a `public/`
-folder, and Vercel's zero-config would otherwise serve *that* as the site.
-Pointing at `golf/` also means no `package.json` is found, so Vercel skips
-install and build entirely and just uploads the static files.
+The app is the whole repository, so Vercel's zero-config just uploads the
+static files: there is no `package.json`, so it skips install and build.
 
-`golf/vercel.json` is then the live config — it sets `cleanUrls` and sends
+`vercel.json` is the live config — it sets `cleanUrls` and sends
 `Cache-Control: no-cache` for `sw.js` so service-worker updates are picked up.
 
-Once linked, every push to this branch redeploys automatically.
+Once linked, every push to `main` redeploys automatically.
+
+(Until 4 October 2026 this app lived in the `golf/` folder of the
+MathsonInvestments repository; it moved here with its history intact.)
 
 ### Install on your phone
 
